@@ -5,148 +5,38 @@ const urlParams = `language=en-US&page=1&api_key=${TMDB_API_KEY}`;
 
 //API urls
 const popularMoviesURL = `${baseURL}/movie/popular?${urlParams}`;
-const popularSeriesURL = `${baseURL}/tv/popular?${urlParams}`;
 const topRatedMoviesURL = `${baseURL}/movie/top_rated?${urlParams}`;
+const popularSeriesURL = `${baseURL}/tv/popular?${urlParams}`;
 const topRatedSeriesURL = `${baseURL}/tv/top_rated?${urlParams}`;
 
-// element selectors
-const popularMoviesGrid = document.getElementById("popular-movies-grid");
-const popularMoviesLoader = document.getElementById("popular-movies-loading");
-const popularMoviesEmpty = document.getElementById("popular-movies-empty");
 
-const topRatedMoviesGrid = document.getElementById("top-rated-movies-grid");
-const topRatedMoviesLoader = document.getElementById("top-rated-movies-loading");
-const topRatedMoviesEmpty = document.getElementById("top-rated-movies-empty");
 
-const popularSeriesGrid = document.getElementById("popular-series-grid");
-const popularSeriesLoader = document.getElementById("popular-series-loading");
-const popularSeriesEmpty = document.getElementById("popular-series-empty");
-
-const topRatedSeriesGrid = document.getElementById("top-rated-series-grid");
-const topRatedSeriesLoader = document.getElementById("top-rated-series-loading");
-const topRatedSeriesEmpty = document.getElementById("top-rated-series-empty");
-
-// data getter
-const getData = () => {
-  getPopularMovies();
-  getPopularSeries();
-  getTopRatedMovies();
-  getTopRatedSeries();
+// helpers
+const beautifyDate = (date) => {
+  const formattedDate = new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return formattedDate;
 };
 
-// api wrappers
-const getPopularMovies = async () => {
-  try {
-    const response = await fetch(popularMoviesURL);
-    popularMoviesLoader.classList.add("hidden");
-    if (response.ok) {
-      const apiData = await response.json();
-      if (apiData?.results && apiData?.results?.length > 0) {
-        popularMoviesGrid.classList.remove('hidden')
-        popularMoviesGrid.classList.add("grid")
-        apiData?.results?.forEach((obj) => {
-          popularMoviesGrid?.insertAdjacentHTML("beforeend", createCard(obj));
-        });
-      } else{
-        popularMoviesEmpty.classList.remove("hidden")
-        popularMoviesEmpty.classList.add("flex")
-      }
-    } else {
-      throw new error("unable to fetch data");
-    }
-  } catch (error) {
-    console.log(error);
-    popularMoviesEmpty.classList.remove("hidden")
-    popularMoviesEmpty.classList.add("flex")
-  }
-};
+const getElement =(id)=>{
+  return document.getElementById(id)
+}
 
-const getPopularSeries = async () => {
-  try {
-    const response = await fetch(popularSeriesURL);
-    popularSeriesLoader.classList.add("hidden");
-    if (response.ok) {
-      const apiData = await response.json();
-      if (apiData?.results && apiData?.results?.length > 0) {
-        popularSeriesGrid.classList.remove('hidden')
-        popularSeriesGrid.classList.add("grid")
-        apiData?.results?.forEach((obj) => {
-          popularSeriesGrid?.insertAdjacentHTML("beforeend", createCard(obj));
-        });
-      } else{
-        popularSeriesEmpty.classList.remove("hidden")
-        popularSeriesEmpty.classList.add("flex")
-      }
-    } else {
-      throw new error("unable to fetch data");
-    }
-  } catch (error) {
-    console.log(error);
-    popularSeriesEmpty.classList.remove("hidden")
-    popularSeriesEmpty.classList.add("flex")
-  }
-};
-
-const getTopRatedSeries = async () => {
-  try {
-    const response = await fetch(topRatedSeriesURL);
-    topRatedSeriesLoader.classList.add("hidden");
-    if (response.ok) {
-      const apiData = await response.json();
-      if (apiData?.results && apiData?.results?.length > 0) {
-        topRatedSeriesGrid.classList.remove('hidden')
-        topRatedSeriesGrid.classList.add("grid")
-        apiData?.results?.forEach((obj) => {
-          topRatedSeriesGrid?.insertAdjacentHTML("beforeend", createCard(obj));
-        });
-      } else{
-        topRatedSeriesEmpty.classList.remove("hidden")
-        topRatedSeriesEmpty.classList.add("flex")
-      }
-    } else {
-      throw new error("unable to fetch data");
-    }
-  } catch (error) {
-    console.log(error);
-    topRatedSeriesEmpty.classList.remove("hidden")
-    topRatedSeriesEmpty.classList.add("flex")
-  }
-};
-
-const getTopRatedMovies = async () => {
-  try {
-    const response = await fetch(topRatedMoviesURL);
-    topRatedMoviesLoader.classList.add("hidden");
-    if (response.ok) {
-      const apiData = await response.json();
-      if (apiData?.results && apiData?.results?.length > 0) {
-        topRatedMoviesGrid.classList.remove('hidden')
-        topRatedMoviesGrid.classList.add("grid")
-        apiData?.results?.forEach((obj) => {
-          topRatedMoviesGrid?.insertAdjacentHTML("beforeend", createCard(obj));
-        });
-      } else{
-        topRatedMoviesEmpty.classList.remove("hidden")
-        topRatedMoviesEmpty.classList.add("flex")
-      }
-    } else {
-      throw new error("unable to fetch data");
-    }
-  } catch (error) {
-    console.log(error);
-    topRatedMoviesEmpty.classList.remove("hidden")
-    topRatedMoviesEmpty.classList.add("flex")
-  }
-};
 
 //  card
 const createCard = (data) => {
   // console.log(data)
   const title = (data?.title || data?.name) ?? "--";
-  const date = (data?.release_date || data?.first_air_date)  ? beautifyDate(data.release_date || data?.first_air_date) : "--";
+  const date =
+    data?.release_date || data?.first_air_date
+      ? beautifyDate(data.release_date || data?.first_air_date)
+      : "--";
   const rate = data?.vote_average?.toFixed(1) ?? "--";
   const posterPath = data?.poster_path;
-  
+
   const template = `<div
               class="group  relative transition-all overflow-hidden duration-300"
             >
@@ -194,15 +84,95 @@ const createCard = (data) => {
   return template;
 };
 
-// helpers
-const beautifyDate = (date) => {
-  const formattedDate = new Date(date).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  return formattedDate;
+
+
+// element selectors
+const popularMoviesGrid = getElement("popular-movies-grid");
+const popularMoviesLoader = getElement("popular-movies-loading");
+const popularMoviesEmpty = getElement("popular-movies-empty");
+
+const topRatedMoviesGrid = getElement("top-rated-movies-grid");
+const topRatedMoviesLoader = getElement(
+  "top-rated-movies-loading",
+);
+const topRatedMoviesEmpty = getElement("top-rated-movies-empty");
+
+const popularSeriesGrid = getElement("popular-series-grid");
+const popularSeriesLoader = getElement("popular-series-loading");
+const popularSeriesEmpty = getElement("popular-series-empty");
+
+const topRatedSeriesGrid = getElement("top-rated-series-grid");
+const topRatedSeriesLoader = getElement(
+  "top-rated-series-loading",
+);
+const topRatedSeriesEmpty = getElement("top-rated-series-empty");
+
+// data getter
+const getData = () => {
+  getApiDataWrapper(
+    popularMoviesURL,
+    popularMoviesLoader,
+    popularMoviesGrid,
+    popularMoviesEmpty,
+  );
+  getApiDataWrapper(
+    topRatedMoviesURL,
+    topRatedMoviesLoader,
+    topRatedMoviesGrid,
+    topRatedMoviesEmpty,
+  );
+  getApiDataWrapper(
+    popularSeriesURL,
+    popularSeriesLoader,
+    popularSeriesGrid,
+    popularSeriesEmpty,
+  );
+  getApiDataWrapper(
+    topRatedSeriesURL,
+    topRatedSeriesLoader,
+    topRatedSeriesGrid,
+    topRatedSeriesEmpty,
+  );
 };
+
+// api wrapper
+// since we are using display property for showing and hiding data thats why we are removing and adding flex/grid/hidden classes
+// by default empty state is always visible
+const getApiDataWrapper = async (url, loaderEl, gridEl, emptyEl) => {
+  try {
+    emptyEl.classList.add("hidden"); // hiding empty state because by default it's always visible wheather api is called or not
+    emptyEl.classList.remove("flex"); // hiding empty state by removing flex class too
+
+    loaderEl.classList.remove("hidden"); // activating loader by removing hidden class
+    loaderEl.classList.add("flex"); // activating loader by adding flex class too
+    const response = await fetch(url);
+    loaderEl.classList.add("hidden"); //deactivating loader by adding hidden class
+    loaderEl.classList.remove("flex"); // deactivating loader by removing flex class too
+    if (response.ok) {
+      const apiData = await response.json();
+      if (apiData?.results && apiData?.results?.length > 0) {
+        gridEl.classList.remove("hidden"); // showing main grid by removing hidden class
+        gridEl.classList.add("grid"); // showing main grid by adding grid class too
+        apiData?.results?.forEach((obj) => {
+          gridEl?.insertAdjacentHTML("beforeend", createCard(obj));
+        });
+      } else {
+        emptyEl.classList.remove("hidden"); // showing empty class by removing hidden class
+        emptyEl.classList.add("flex"); // showing empty by adding flex class too
+      }
+    } else {
+      throw new error("unable to fetch data");
+    }
+  } catch (error) {
+    console.log(error);
+    emptyEl.classList.remove("hidden"); // showing empty class by removing hidden class
+    emptyEl.classList.add("flex"); // showing empty by adding flex class too
+  }
+};
+
+
+
+
 
 // calling api
 document.addEventListener("DOMContentLoaded", getData);
