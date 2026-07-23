@@ -9,8 +9,6 @@ const topRatedMoviesURL = `${baseURL}/movie/top_rated?${urlParams}`;
 const popularSeriesURL = `${baseURL}/tv/popular?${urlParams}`;
 const topRatedSeriesURL = `${baseURL}/tv/top_rated?${urlParams}`;
 
-
-
 // helpers
 const beautifyDate = (date) => {
   const formattedDate = new Date(date).toLocaleDateString("en-GB", {
@@ -21,24 +19,30 @@ const beautifyDate = (date) => {
   return formattedDate;
 };
 
-const getElement =(id)=>{
-  return document.getElementById(id)
+const getElement = (id) => {
+  return document.getElementById(id);
+};
+
+const addToGoogleCalendar = (data)=>{
+  console.log(data)
 }
 
 
 //  card
-const createCard = (data) => {
+const createCard = (data , index) => {
   // console.log(data)
+  
+
   const title = (data?.title || data?.name) ?? "--";
   const date =
     data?.release_date || data?.first_air_date
       ? beautifyDate(data.release_date || data?.first_air_date)
       : "--";
   const rate = data?.vote_average?.toFixed(1) ?? "--";
-  const posterPath = data?.poster_path;
-
+  const posterPath = data?.poster_path;  
+                                              
   const template = `<div
-              class="group  relative transition-all overflow-hidden duration-300"
+              class="group  relative transition-all overflow-hidden duration-300" 
             >
               <div
                 class="relative aspect-[2/3] overflow-hidden ring-1 ring-white/[0.06] hover:ring-white/15 bg-cinema-800 rounded-lg"
@@ -54,10 +58,10 @@ const createCard = (data) => {
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 md:block hidden"></div>
                 <div class=" absolute bottom-0 translate-y-full group-hover:translate-y-0 inset-x-0 p-2.5 transition-all duration-300 md:block hidden">
                   <div class="grid grid-cols-2  gap-2 ">
-                    <button class="btn-google bg-white text-black rounded-sm font-semibold text-[11px] px-4 py-2 cursor-pointer hover:bg-white/90 transition-all 
+                    <button id="btn-google" data-index="${index}" class=" bg-white text-black rounded-sm font-semibold text-[11px] px-4 py-2 cursor-pointer hover:bg-white/90 transition-all 
                     flex items-center justify-center text-center gap-1" title="Add to Google calendar">
                       <ion-icon class="flex-none" name="calendar-clear-outline"></ion-icon> Google</button>
-                    <button class="btn-ics bg-primary text-primary-foreground rounded-sm font-semibold text-[11px] px-4 py-2 cursor-pointer hover:bg-primary/90 transition-all 
+                    <button id="btn-download" class=" bg-primary text-primary-foreground rounded-sm font-semibold text-[11px] px-4 py-2 cursor-pointer hover:bg-primary/90 transition-all 
                     flex items-center justify-center text-center gap-1" title="Download for Apple / Outlook">
                       <ion-icon class="flex-none" name="arrow-down-outline"></ion-icon> Download</button>
                       
@@ -81,10 +85,9 @@ const createCard = (data) => {
                   </div>
               </div>
             </div>`;
+           
   return template;
 };
-
-
 
 // element selectors
 const popularMoviesGrid = getElement("popular-movies-grid");
@@ -92,9 +95,7 @@ const popularMoviesLoader = getElement("popular-movies-loading");
 const popularMoviesEmpty = getElement("popular-movies-empty");
 
 const topRatedMoviesGrid = getElement("top-rated-movies-grid");
-const topRatedMoviesLoader = getElement(
-  "top-rated-movies-loading",
-);
+const topRatedMoviesLoader = getElement("top-rated-movies-loading");
 const topRatedMoviesEmpty = getElement("top-rated-movies-empty");
 
 const popularSeriesGrid = getElement("popular-series-grid");
@@ -102,9 +103,7 @@ const popularSeriesLoader = getElement("popular-series-loading");
 const popularSeriesEmpty = getElement("popular-series-empty");
 
 const topRatedSeriesGrid = getElement("top-rated-series-grid");
-const topRatedSeriesLoader = getElement(
-  "top-rated-series-loading",
-);
+const topRatedSeriesLoader = getElement("top-rated-series-loading");
 const topRatedSeriesEmpty = getElement("top-rated-series-empty");
 
 // data getter
@@ -153,9 +152,18 @@ const getApiDataWrapper = async (url, loaderEl, gridEl, emptyEl) => {
       if (apiData?.results && apiData?.results?.length > 0) {
         gridEl.classList.remove("hidden"); // showing main grid by removing hidden class
         gridEl.classList.add("grid"); // showing main grid by adding grid class too
-        apiData?.results?.forEach((obj) => {
-          gridEl?.insertAdjacentHTML("beforeend", createCard(obj));
+        apiData?.results?.forEach((obj,index) => {
+          gridEl?.insertAdjacentHTML("beforeend", createCard(obj , index));
+      
         });
+        gridEl.addEventListener('click',(event)=>{
+          const googleBtn = event.target.closest("#btn-google")
+          if(!googleBtn){
+            return 
+          }
+          const selectedItem = apiData?.results?.[event?.target?.dataset?.index]
+          addToGoogleCalendar(selectedItem)
+        })
       } else {
         emptyEl.classList.remove("hidden"); // showing empty class by removing hidden class
         emptyEl.classList.add("flex"); // showing empty by adding flex class too
@@ -169,10 +177,6 @@ const getApiDataWrapper = async (url, loaderEl, gridEl, emptyEl) => {
     emptyEl.classList.add("flex"); // showing empty by adding flex class too
   }
 };
-
-
-
-
 
 // calling api
 document.addEventListener("DOMContentLoaded", getData);
