@@ -28,23 +28,24 @@ const getElement = (id) => {
 //   return date.toISOString().slice(0, 10).replace(/-/g, "");
 // };
 
- const buildGoogleCalendarUrl=(title , date , overview)=>{
-    const startDate = date.replace(/-/g,"")
-    
-    const endDate= startDate
-    const eventTitle =`${title} - WATCH`
-    const details = overview
-    const params= new URLSearchParams({
-      action : "TEMPLATE",
-      text : eventTitle ,
-      dates : `${startDate}/${endDate}`,
-      details : details
+const buildGoogleCalendarUrl = (title, date, overview) => {
+  const startDate = date.replace(/-/g, "");
+  const endDate = startDate;
+  const eventTitle = `${title} - WATCH`;
+  const details = overview;
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: eventTitle,
+    dates: `${startDate}/${endDate}`,
+    details: details
+  });
+  
+  const finalUrl = `https://calendar.google.com/calendar/render?${params.toString()}`;
+  console.log(finalUrl);
+  return finalUrl;
+};
 
-    })
-     const finalUrl=`https://calendar.google.com/calendar/render?${params.toString()}`
-     console.log(finalUrl)
-     return finalUrl
- }
+
 const attachCalendarListners = (card, data) => {
   const title = (data?.title || data?.name) ?? "--";
   const date = data?.release_date || data?.first_air_date;
@@ -52,16 +53,13 @@ const attachCalendarListners = (card, data) => {
   const mediaType = data?.title ? "movie" : "series";
   const handleClick = (action) => {
     console.log(action);
-    if(!date){
-      alert ("release date is not available for this title  ")
-      return
+    if (!date) {
+      alert("release date is not available for this title");
+      return;
     }
-    if(action==="google" ){
-      window.open(buildGoogleCalendarUrl(title , date ,overView), '_blank')
-      
-    }
-    else{
-
+    if (action === "google") {
+      window.open(buildGoogleCalendarUrl(title, date, overView), "_blank");
+    } else {
     }
   };
   const icsBtns = card.querySelectorAll('[data-action="ics"]');
