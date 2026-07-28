@@ -37,19 +37,59 @@ const buildGoogleCalendarUrl = (title, date, overview) => {
     action: "TEMPLATE",
     text: eventTitle,
     dates: `${startDate}/${endDate}`,
-    details: details
+    details: details,
   });
-  
+
   const finalUrl = `https://calendar.google.com/calendar/render?${params.toString()}`;
   console.log(finalUrl);
   return finalUrl;
 };
 
+const escapeIcsText = (text) =>
+  String(text ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\n/g, "\\n");
+
+const buildIcsContent = (title, reminderDate, details) => {
+  const date = reminderDate.replace(/-/g, "");
+  const eventTitle = `${title} — Watch`;
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//CineRemind//EN",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${Date.now()}-${Math.random().toString(36).slice(2)}@cineremind`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
+    `DTSTART;VALUE=DATE:${date}`,
+    `SUMMARY:${escapeIcsText(eventTitle)}`,
+    `DESCRIPTION:${escapeIcsText(details)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+};
+const downoladIcsFile = (title, date, overview) => {
+  const blob = new Blob([buildIcsContent(title, date, overview)], {
+    type: "text/calendar;charset=utf-8",
+  });
+  console.log(blob);
+  const url= URL.createObjectURL(blob)
+  console.log(url)
+  const link= document.createElement('a')
+  link.href=url
+  
+  link.download=`${title}.ics`
+  console.log(link)
+  link.click()
+  URL.revokeObjectURL(url)
+};
 
 const attachCalendarListners = (card, data) => {
   const title = (data?.title || data?.name) ?? "--";
   const date = data?.release_date || data?.first_air_date;
-  const overView = data?.overview;
+  const overview = data?.overview;
   const mediaType = data?.title ? "movie" : "series";
   const handleClick = (action) => {
     console.log(action);
@@ -58,8 +98,9 @@ const attachCalendarListners = (card, data) => {
       return;
     }
     if (action === "google") {
-      window.open(buildGoogleCalendarUrl(title, date, overView), "_blank");
+      window.open(buildGoogleCalendarUrl(title, date, overview), "_blank");
     } else {
+      downoladIcsFile(title, date, overview);
     }
   };
   const icsBtns = card.querySelectorAll('[data-action="ics"]');
@@ -196,15 +237,6 @@ const getApiDataWrapper = async (url, loaderEl, gridEl, emptyEl) => {
           gridEl?.insertAdjacentHTML("beforeend", createCard(obj, index));
           attachCalendarListners(gridEl.lastElementChild, obj);
         });
-        // gridEl.addEventListener("click", (event) => {
-        //   const googleBtn = event.target.closest("#btn-google");
-        //   if (!googleBtn) {
-        //     return;
-        //   }
-        //   const selectedItem =
-        //     apiData?.results?.[event?.target?.dataset?.index];
-        //   addToGoogleCalendar(selectedItem);
-        // });
       } else {
         emptyEl.classList.remove("hidden"); // showing empty class by removing hidden class
         emptyEl.classList.add("flex"); // showing empty by adding flex class too
