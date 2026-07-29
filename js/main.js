@@ -4,6 +4,7 @@ const baseURL = "https://api.themoviedb.org/3";
 const urlParams = `language=en-US&page=1&api_key=${TMDB_API_KEY}`;
 
 //API urls
+const upcomingMoviesURL = `${baseURL}/movie/upcoming?${urlParams}`;
 const popularMoviesURL = `${baseURL}/movie/popular?${urlParams}`;
 const topRatedMoviesURL = `${baseURL}/movie/top_rated?${urlParams}`;
 const popularSeriesURL = `${baseURL}/tv/popular?${urlParams}`;
@@ -74,16 +75,15 @@ const downoladIcsFile = (title, date, overview) => {
   const blob = new Blob([buildIcsContent(title, date, overview)], {
     type: "text/calendar;charset=utf-8",
   });
-  console.log(blob);
-  const url= URL.createObjectURL(blob)
-  console.log(url)
-  const link= document.createElement('a')
-  link.href=url
-  
-  link.download=`${title}.ics`
-  console.log(link)
-  link.click()
-  URL.revokeObjectURL(url)
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+
+  link.download = `${title}.ics`;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 const attachCalendarListners = (card, data) => {
@@ -170,6 +170,10 @@ const createCard = (data, index) => {
 };
 
 // element selectors
+const upcomingMoviesGrid = getElement("upcoming-movies-grid");
+const upcomingMoviesLoader = getElement("upcoming-movies-loading");
+const upcomingMoviesEmpty = getElement("upcoming-movies-empty");
+
 const popularMoviesGrid = getElement("popular-movies-grid");
 const popularMoviesLoader = getElement("popular-movies-loading");
 const popularMoviesEmpty = getElement("popular-movies-empty");
@@ -188,6 +192,12 @@ const topRatedSeriesEmpty = getElement("top-rated-series-empty");
 
 // data getter
 const getData = () => {
+  getApiDataWrapper(
+    upcomingMoviesURL,
+    upcomingMoviesLoader,
+    upcomingMoviesGrid,
+    upcomingMoviesEmpty,
+  );
   getApiDataWrapper(
     popularMoviesURL,
     popularMoviesLoader,
