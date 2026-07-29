@@ -29,10 +29,10 @@ const getElement = (id) => {
 //   return date.toISOString().slice(0, 10).replace(/-/g, "");
 // };
 
-const buildGoogleCalendarUrl = (title, date, overview) => {
+const buildGoogleCalendarUrl = (title, date, overview, mediaType) => {
   const startDate = date.replace(/-/g, "");
   const endDate = startDate;
-  const eventTitle = `${title} - WATCH`;
+  const eventTitle = `${title} - WATCH ${mediaType}`;
   const details = overview;
   const params = new URLSearchParams({
     action: "TEMPLATE",
@@ -42,7 +42,7 @@ const buildGoogleCalendarUrl = (title, date, overview) => {
   });
 
   const finalUrl = `https://calendar.google.com/calendar/render?${params.toString()}`;
-  console.log(finalUrl);
+
   return finalUrl;
 };
 
@@ -53,9 +53,9 @@ const escapeIcsText = (text) =>
     .replace(/,/g, "\\,")
     .replace(/\n/g, "\\n");
 
-const buildIcsContent = (title, reminderDate, details) => {
+const buildIcsContent = (title, reminderDate, details, mediaType) => {
   const date = reminderDate.replace(/-/g, "");
-  const eventTitle = `${title} — Watch`;
+  const eventTitle = `${title} — Watch ${mediaType}`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -85,6 +85,39 @@ const downoladIcsFile = (title, date, overview) => {
   link.click();
   URL.revokeObjectURL(url);
 };
+const getTommorowsDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const year = tomorrow.getFullYear();
+  const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const day = String(tomorrow.getDate()).padStart(2, "0");
+
+  const formattedDate = `${year}-${month}-${day}`;
+  return formattedDate;
+};
+function hasDatePassed(dateString) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set today's time to 00:00:00
+
+  const inputDate = new Date(dateString);
+
+  return inputDate < today;
+}
+const getReminderDate = (date, mediaType) => {
+  if (hasDatePassed(date)) {
+    const confirmed = confirm(
+      `This release date has been already passed. Would you like to add a reminder to watch this ${mediaType} tommmorow?`,
+    );
+
+    if (!confirmed) {
+      return null;
+    }
+    return getTommorowsDate();
+  } else {
+    return date;
+  }
+};
 
 const attachCalendarListners = (card, data) => {
   const title = (data?.title || data?.name) ?? "--";
@@ -92,15 +125,26 @@ const attachCalendarListners = (card, data) => {
   const overview = data?.overview;
   const mediaType = data?.title ? "movie" : "series";
   const handleClick = (action) => {
-    console.log(action);
     if (!date) {
       alert("release date is not available for this title");
       return;
     }
+    const reminderDate = getReminderDate(date, mediaType);
+    if (!reminderDate) {
+      return;
+    }
     if (action === "google") {
-      window.open(buildGoogleCalendarUrl(title, date, overview), "_blank");
+      window.open(
+        buildGoogleCalendarUrl(
+          title,
+          reminderDate,
+          overview,
+          mediaType.toUpperCase(),
+        ),
+        "_blank",
+      );
     } else {
-      downoladIcsFile(title, date, overview);
+      downoladIcsFile(title, reminderDate, overview, mediaType.toUpperCase());
     }
   };
   const icsBtns = card.querySelectorAll('[data-action="ics"]');
