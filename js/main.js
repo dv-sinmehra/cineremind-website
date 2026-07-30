@@ -19,6 +19,9 @@ const beautifyDate = (date) => {
   });
   return formattedDate;
 };
+const sortByDate =(results)=>{
+  return results.sort((a, b) => new Date(b.release_date || b.first_air_date) - new Date(a.release_date || a.first_air_date));
+}
 
 const getElement = (id) => {
   return document.getElementById(id);
@@ -287,7 +290,7 @@ const getApiDataWrapper = async (url, loaderEl, gridEl, emptyEl) => {
       if (apiData?.results && apiData?.results?.length > 0) {
         gridEl.classList.remove("hidden"); // showing main grid by removing hidden class
         gridEl.classList.add("grid"); // showing main grid by adding grid class too
-        apiData?.results?.forEach((obj, index) => {
+        sortByDate(apiData?.results)?.forEach((obj, index) => {
           gridEl?.insertAdjacentHTML("beforeend", createCard(obj, index));
           attachCalendarListners(gridEl.lastElementChild, obj);
         });
