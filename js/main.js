@@ -1,7 +1,7 @@
 // configs
 const TMDB_API_KEY = "4c5e11f029ea489e57411db8642c2fca";
 const baseURL = "https://api.themoviedb.org/3";
-const urlParams = `language=en-US&page=1&api_key=${TMDB_API_KEY}`;
+const urlParams = `language=en-US&page=1&include_adult=false&api_key=${TMDB_API_KEY}`;
 
 //API urls
 const upcomingMoviesURL = `${baseURL}/movie/upcoming?${urlParams}`;
