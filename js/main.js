@@ -30,15 +30,15 @@ const sortByDate = (results) => {
 const getElement = (id) => {
   return document.getElementById(id);
 };
-// const getNextDay = (dateStr) => {
-//   const date = new Date(`${dateStr}T00:00:00`);
-//   date.setDate(date.getDate() + 1);
-//   return date.toISOString().slice(0, 10).replace(/-/g, "");
-// };
+const getNextDay = (dateStr) => {
+  const date = new Date(`${dateStr}T00:00:00`);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().slice(0, 10).replace(/-/g, "");
+};
 
 const buildGoogleCalendarUrl = (title, date, overview, mediaType) => {
   const startDate = date.replace(/-/g, "");
-  const endDate = startDate;
+  const endDate = getNextDay(date);
   const eventTitle = `${title} - WATCH ${mediaType}`;
   const details = overview;
   const params = new URLSearchParams({
@@ -78,8 +78,8 @@ const buildIcsContent = (title, reminderDate, details, mediaType) => {
     "END:VCALENDAR",
   ].join("\r\n");
 };
-const downoladIcsFile = (title, date, overview) => {
-  const blob = new Blob([buildIcsContent(title, date, overview)], {
+const downoladIcsFile = (title, date, overview, mediaType) => {
+  const blob = new Blob([buildIcsContent(title, date, overview, mediaType)], {
     type: "text/calendar;charset=utf-8",
   });
 
